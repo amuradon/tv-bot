@@ -4,7 +4,7 @@ steps:
   - name: 'registry.access.redhat.com/ubi8/openjdk-21:1.23'
     entrypoint: '/bin/bash'
     args:
-      - '-c'
+      - '-ceux'
       - |
         chmod +x mvnw && ./mvnw package -DskipTests
 
