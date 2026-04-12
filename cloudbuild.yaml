@@ -2,7 +2,7 @@ steps:
   # 1. Krok: Maven Build (vytvoření JAR)
   # Používáme oficiální Maven obraz. Výsledek se uloží do sdíleného /workspace/target
   - name: 'registry.access.redhat.com/ubi8/openjdk-21:1.23'
-    entrypoint: 'mvnw'
+    entrypoint: './mvnw'
     args: ['package', '-DskipTests']
 
 options:
