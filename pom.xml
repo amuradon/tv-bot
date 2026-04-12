@@ -33,18 +33,18 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-rest-jackson</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>io.quarkus</groupId>-->
-<!--			<artifactId>quarkus-rest-client-jackson</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>io.quarkus</groupId>-->
-<!--			<artifactId>quarkus-smallrye-fault-tolerance</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>io.quarkus</groupId>-->
-<!--			<artifactId>quarkus-scheduler</artifactId>-->
-<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>io.quarkus</groupId>-->
+		<!--			<artifactId>quarkus-rest-client-jackson</artifactId>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>io.quarkus</groupId>-->
+		<!--			<artifactId>quarkus-smallrye-fault-tolerance</artifactId>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>io.quarkus</groupId>-->
+		<!--			<artifactId>quarkus-scheduler</artifactId>-->
+		<!--		</dependency>-->
 
 		<dependency>
 			<groupId>io.github.binance</groupId>
@@ -83,6 +83,11 @@
 			<groupId>io.fabric8</groupId>
 			<artifactId>mockwebserver</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-container-image-jib</artifactId>
 		</dependency>
 	</dependencies>
 
