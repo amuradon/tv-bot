@@ -5,9 +5,14 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.RestResponse.ResponseBuilder;
 import org.jboss.resteasy.reactive.RestResponse.Status;
 
+import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.common.configuration.ClientConfiguration;
 import com.binance.connector.client.common.configuration.SignatureConfiguration;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.DerivativesTradingUsdsFuturesRestApiUtil;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderRequest;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderResponse;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.Side;
 
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
@@ -47,6 +52,18 @@ public class TvWeebhookResource {
 		signatureConfiguration.setApiKey(apiKey);
 		signatureConfiguration.setSecretKey(secretKey);
 		config.setSignatureConfiguration(signatureConfiguration);
+		DerivativesTradingUsdsFuturesRestApi api = new DerivativesTradingUsdsFuturesRestApi(config);
+		
+		NewOrderRequest newOrderRequest = new NewOrderRequest()
+				.symbol(data.symbol().replace(".P", "")) // Symbol will probably come from TV like BTCUSDT.P
+				.side("buy".equalsIgnoreCase(data.side()) ? Side.BUY : Side.SELL)
+				.type("MARKET")
+				.quantity(data.quantity())
+				.reduceOnly(data.reduceOnly() ? "true" : "false")
+				.newClientOrderId(data.newClientOrderId());
+		ApiResponse<NewOrderResponse> response = api.newOrder(newOrderRequest);
+		
+		Log.debugf("New order response %d %s", response.getStatusCode(), response.getData());
 		
 		return ResponseBuilder.ok().build();
 	}
