@@ -48,6 +48,8 @@ public class TvWeebhookResource {
 	@Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
 	@POST
 	public RestResponse<Object> handle(String body) {
+		Log.debugf("Received body %s", body);
+		
 		WebhookData data;
 		try {
 			data = mapper.readValue(body, WebhookData.class);
