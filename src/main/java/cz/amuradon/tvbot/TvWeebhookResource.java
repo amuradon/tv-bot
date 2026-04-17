@@ -13,11 +13,15 @@ import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.De
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderRequest;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.Side;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("/tvwebhook")
 public class TvWeebhookResource {
@@ -28,18 +32,29 @@ public class TvWeebhookResource {
 	
 	private final String userUuid;
 	
+	private final ObjectMapper mapper;
+	
 	@Inject
 	public TvWeebhookResource(@ConfigProperty(name = "BINANCE_API_KEY")	String apiKey,
 			@ConfigProperty(name = "BINANCE_SECRET_KEY") String secretKey,
-			@ConfigProperty(name = "TVBOT_USER_UUID") String userUuid) {
+			@ConfigProperty(name = "TVBOT_USER_UUID") String userUuid,
+			ObjectMapper mapper) {
 		this.apiKey = apiKey;
 		this.secretKey = secretKey;
 		this.userUuid = userUuid;
+		this.mapper = mapper;
 	}
 	
-	
+	@Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
 	@POST
-	public RestResponse<Object> handle(WebhookData data) {
+	public RestResponse<Object> handle(String body) {
+		WebhookData data;
+		try {
+			data = mapper.readValue(body, WebhookData.class);
+		} catch (JsonProcessingException e) {
+			Log.error("Not able to parse body as JSON", e);
+			return ResponseBuilder.create(Status.BAD_REQUEST).entity("Not able to parse body as JSON").build();
+		}
 		Log.infof("Received webhook request for %s, %s, %s", data.symbol(), data.side(), data.newClientOrderId());
 		
 		if (data.userUuid() == null || !data.userUuid().equals(userUuid)) {
