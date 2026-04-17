@@ -65,6 +65,10 @@ public class TvWeebhookResource {
 		
 		Log.debugf("New order response %d %s", response.getStatusCode(), response.getData());
 		
+		if (response.getStatusCode() < 200 && response.getStatusCode() >= 300) {
+			return ResponseBuilder.create(response.getStatusCode()).entity(response.getData()).build();
+		}
+		
 		return ResponseBuilder.ok().build();
 	}
 }
