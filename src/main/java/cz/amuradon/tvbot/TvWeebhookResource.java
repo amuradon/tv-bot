@@ -54,7 +54,7 @@ public class TvWeebhookResource {
 		try {
 			data = mapper.readValue(body, WebhookData.class);
 		} catch (JsonProcessingException e) {
-			Log.error("Not able to parse body as JSON", e);
+			Log.errorf(e, "Not able to parse body as JSON: %s", body);
 			return ResponseBuilder.create(Status.BAD_REQUEST).entity("Not able to parse body as JSON").build();
 		}
 		Log.infof("Received webhook request for %s, %s, %s", data.symbol(), data.side(), data.newClientOrderId());
