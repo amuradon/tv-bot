@@ -6,13 +6,8 @@ import org.jboss.resteasy.reactive.RestResponse.ResponseBuilder;
 import org.jboss.resteasy.reactive.RestResponse.Status;
 
 import com.binance.connector.client.common.ApiResponse;
-import com.binance.connector.client.common.configuration.ClientConfiguration;
-import com.binance.connector.client.common.configuration.SignatureConfiguration;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.DerivativesTradingUsdsFuturesRestApiUtil;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderRequest;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewAlgoOrderResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderResponse;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.Side;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -26,21 +21,17 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/tvwebhook")
 public class TvWeebhookResource {
 
-	private final String apiKey;
-
-	private final String secretKey;
+	private final SimpleRestClient restClient;
 	
 	private final String userUuid;
 	
 	private final ObjectMapper mapper;
 	
 	@Inject
-	public TvWeebhookResource(@ConfigProperty(name = "BINANCE_API_KEY")	String apiKey,
-			@ConfigProperty(name = "BINANCE_SECRET_KEY") String secretKey,
+	public TvWeebhookResource(SimpleRestClient restClient,
 			@ConfigProperty(name = "TVBOT_USER_UUID") String userUuid,
 			ObjectMapper mapper) {
-		this.apiKey = apiKey;
-		this.secretKey = secretKey;
+		this.restClient = restClient;
 		this.userUuid = userUuid;
 		this.mapper = mapper;
 	}
@@ -64,26 +55,20 @@ public class TvWeebhookResource {
 			return ResponseBuilder.create(Status.UNAUTHORIZED).build();
 		}
 		
-		ClientConfiguration config = DerivativesTradingUsdsFuturesRestApiUtil.getClientConfiguration();
-		SignatureConfiguration signatureConfiguration = new SignatureConfiguration();
-		signatureConfiguration.setApiKey(apiKey);
-		signatureConfiguration.setSecretKey(secretKey);
-		config.setSignatureConfiguration(signatureConfiguration);
-		DerivativesTradingUsdsFuturesRestApi api = new DerivativesTradingUsdsFuturesRestApi(config);
 		
-		NewOrderRequest newOrderRequest = new NewOrderRequest()
-				.symbol(data.symbol().replace(".P", "")) // Symbol will probably come from TV like BTCUSDT.P
-				.side("buy".equalsIgnoreCase(data.side()) ? Side.BUY : Side.SELL)
-				.type("MARKET")
-				.quantity(data.quantity())
-				.reduceOnly(data.reduceOnly() ? "true" : "false")
-				.newClientOrderId(data.newClientOrderId());
-		ApiResponse<NewOrderResponse> response = api.newOrder(newOrderRequest);
+		ApiResponse<NewOrderResponse> response = restClient.newOrder(data);
 		
 		Log.debugf("New order response %d %s", response.getStatusCode(), response.getData());
 		
 		if (response.getStatusCode() < 200 && response.getStatusCode() >= 300) {
 			return ResponseBuilder.create(response.getStatusCode()).entity(response.getData()).build();
+		}
+		
+		if ("buy".equalsIgnoreCase(data.side())) {
+			ApiResponse<NewAlgoOrderResponse> stopLossResponse = restClient.stopLoss(data);
+			if (stopLossResponse.getStatusCode() < 200 && stopLossResponse.getStatusCode() >= 300) {
+				return ResponseBuilder.create(stopLossResponse.getStatusCode()).entity(stopLossResponse.getData()).build();
+			}
 		}
 		
 		return ResponseBuilder.ok().build();

@@ -33,14 +33,15 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-rest-jackson</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-smallrye-fault-tolerance</artifactId>
+		</dependency>
 		<!--		<dependency>-->
 		<!--			<groupId>io.quarkus</groupId>-->
 		<!--			<artifactId>quarkus-rest-client-jackson</artifactId>-->
 		<!--		</dependency>-->
-		<!--		<dependency>-->
-		<!--			<groupId>io.quarkus</groupId>-->
-		<!--			<artifactId>quarkus-smallrye-fault-tolerance</artifactId>-->
-		<!--		</dependency>-->
+
 		<!--		<dependency>-->
 		<!--			<groupId>io.quarkus</groupId>-->
 		<!--			<artifactId>quarkus-scheduler</artifactId>-->

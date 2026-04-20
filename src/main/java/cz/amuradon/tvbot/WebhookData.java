@@ -5,6 +5,7 @@ public record WebhookData(String symbol,
 		double quantity,
 		boolean reduceOnly,
 		String newClientOrderId,
+		double stopLoss,
 		String userUuid) {
 
 }
