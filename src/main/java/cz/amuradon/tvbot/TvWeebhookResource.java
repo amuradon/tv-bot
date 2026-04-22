@@ -21,14 +21,14 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/tvwebhook")
 public class TvWeebhookResource {
 
-	private final SimpleRestClient restClient;
+	private final OrderManager restClient;
 	
 	private final String userUuid;
 	
 	private final ObjectMapper mapper;
 	
 	@Inject
-	public TvWeebhookResource(SimpleRestClient restClient,
+	public TvWeebhookResource(OrderManager restClient,
 			@ConfigProperty(name = "TVBOT_USER_UUID") String userUuid,
 			ObjectMapper mapper) {
 		this.restClient = restClient;

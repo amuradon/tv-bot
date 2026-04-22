@@ -1,11 +1,13 @@
 package cz.amuradon.tvbot;
 
+import java.math.BigDecimal;
+
 public record WebhookData(String symbol,
 		String side,
-		double quantity,
+		BigDecimal quantity,
 		boolean reduceOnly,
 		String newClientOrderId,
-		double stopLoss,
+		BigDecimal stopLoss,
 		String userUuid) {
 
 }
