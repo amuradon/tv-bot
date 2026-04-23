@@ -43,6 +43,7 @@ public class TvWeebhookResource {
 		
 		WebhookData data;
 		try {
+			// Due TradingView sending Content-Type: text/plain MIME type, I need to parse it myself
 			data = mapper.readValue(body, WebhookData.class);
 		} catch (JsonProcessingException e) {
 			Log.errorf(e, "Not able to parse body as JSON: %s", body);
@@ -55,7 +56,13 @@ public class TvWeebhookResource {
 			return ResponseBuilder.create(Status.UNAUTHORIZED).build();
 		}
 		
+		String errorReason = restClient.isSupported(data.symbol());
+		if (errorReason != null) {
+			return ResponseBuilder.create(Status.BAD_REQUEST)
+					.entity(String.format("Not supported symbol %s, error: %s", data.symbol(), errorReason)).build();
+		}
 		
+		// TODO validace, ze hodnoty davaji smysl, napr. stopLoss cena neni >10% od aktualni ceny
 		ApiResponse<NewOrderResponse> response = restClient.newOrder(data);
 		
 		Log.debugf("New order response %d %s", response.getStatusCode(), response.getData());

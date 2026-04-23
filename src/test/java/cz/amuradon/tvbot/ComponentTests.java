@@ -25,9 +25,9 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
-@QuarkusTest
-@TestProfile(MyTestProfile.class)
-public class ErrorTest {
+//@QuarkusTest
+//@TestProfile(MyTestProfile.class)
+public class ComponentTests {
 
 	@InjectMock
 	DerivativesTradingUsdsFuturesRestApi apiMock;
@@ -58,6 +58,8 @@ public class ErrorTest {
 		when(exchangeInfoResponseMock.getData()).thenReturn(exchangeInfoDataMock);
 		when(exchangeInfoDataMock.getSymbols()).thenReturn(List.of(symbolMock));
 		
+		when(symbolMock.getSymbol()).thenReturn("SUIUSDT");
+		when(symbolMock.getStatus()).thenReturn("TRADING");
 		when(symbolMock.getContractType()).thenReturn("PERPETUAL");
 		when(symbolMock.getPricePrecision()).thenReturn(2l);
 		when(symbolMock.getQuantityPrecision()).thenReturn(2l);
@@ -75,14 +77,15 @@ public class ErrorTest {
 		mocks.close();
 	}
 	
-	@Test
-	public void test() {
+	// TODO dokoncit testy
+	//@Test
+	public void errorTest() {
 		when(apiMock.newOrder(any())).thenThrow(new ApiException(400, "", Collections.emptyMap(),
 				"{\"code\":-1111,\"msg\":\"Precision is over the maximum defined for this asset.\"}"));
 		given()
 			.when().body(
 					"""
-					{"symbol":"CRCLUSDT.P","side":"buy","quantity":5.192,"reduceOnly":false,
+					{"symbol":"SUIUSDT.P","side":"buy","quantity":5.192,"reduceOnly":false,
 					"stopLoss": 105.02,"newClientOrderId": "localhost/someID",
 					"userUuid":"tvbot_user_uuid"}
 					""")

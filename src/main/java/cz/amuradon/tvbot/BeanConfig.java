@@ -24,4 +24,5 @@ public class BeanConfig {
 		config.setSignatureConfiguration(signatureConfiguration);
 		return new DerivativesTradingUsdsFuturesRestApi(config);
 	}
+	
 }

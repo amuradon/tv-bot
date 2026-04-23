@@ -16,6 +16,7 @@ import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.Side;
 
+import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -25,20 +26,24 @@ public class OrderManager {
 
 	private final DerivativesTradingUsdsFuturesRestApi api;
 	
+	private final Map<String, String> unsupportedSymbols;
+
 	private final Map<String, SymbolData> symbolData;
 
 	@Inject
 	public OrderManager(DerivativesTradingUsdsFuturesRestApi api) {
 		this.api = api;
+		this.unsupportedSymbols = new HashMap<>();
 		symbolData = new HashMap<>();
 	}
 	
 	@PostConstruct
 	public void init() {
+		Log.debug("Loading exchange information...");
 		ApiResponse<ExchangeInformationResponse> response = api.exchangeInformation();
 		for (ExchangeInformationResponseSymbolsInner symbol : response.getData().getSymbols()) {
 			if (symbol.getContractType().equalsIgnoreCase("PERPETUAL")
-					|| symbol.getContractType().equalsIgnoreCase("TRADIFI_PERPETUAL")) {
+					&& symbol.getStatus().equalsIgnoreCase("TRADING")) {
 				final SymbolData item = new SymbolData();
 				item.pricePrecision = symbol.getPricePrecision().intValue();
 				item.quantityPrecision = symbol.getQuantityPrecision().intValue();
@@ -49,8 +54,17 @@ public class OrderManager {
 						item.tickSize = new BigDecimal(filter.getTickSize());
 					}  
 				}
+				symbolData.put(symbol.getSymbol(), item);
+			} else if (!symbol.getContractType().equalsIgnoreCase("PERPETUAL")) {
+				// TradiFi_Perpetual not supported in my region, I don't trade others
+				unsupportedSymbols.put(symbol.getSymbol(), "contractType=" + symbol.getContractType());
+			} else if (!symbol.getStatus().equalsIgnoreCase("TRADING")) {
+				unsupportedSymbols.put(symbol.getSymbol(), "status=" + symbol.getStatus());
+			} else {
+				unsupportedSymbols.put(symbol.getSymbol(), "other");
 			}
 		}
+		Log.debugf("Exchange information loaded %s", symbolData);
 	}
 	
 	public ApiResponse<NewOrderResponse> newOrder(WebhookData data) {
@@ -59,8 +73,7 @@ public class OrderManager {
 				.symbol(symbol)
 				.side("buy".equalsIgnoreCase(data.side()) ? Side.BUY : Side.SELL)
 				.type("MARKET")
-//				.quantity(normalizeQuantity(data.quantity(), symbol))
-				.quantity(data.quantity().doubleValue())
+				.quantity(normalizeQuantity(data.quantity(), symbol))
 				.reduceOnly(data.reduceOnly() ? "true" : "false")
 				.newClientOrderId(data.newClientOrderId());
 		
@@ -93,7 +106,13 @@ public class OrderManager {
 				.triggerPrice(normalizePrice(data.stopLoss(), symbol))
 				.algoType("CONDITIONAL")
 				.closePosition("true");
+		
+		// TODO ExchangeInfo muze byt stare a dojde k chybe -> podle typu chyby obnovit a zkusit znovu
 		return api.newAlgoOrder(stopLossRequest);
+	}
+	
+	public String isSupported(String symbol) {
+		return unsupportedSymbols.get(normalizeSymbol(symbol));
 	}
 	
 	private class SymbolData {
@@ -101,5 +120,12 @@ public class OrderManager {
 		int quantityPrecision;
 		BigDecimal tickSize;
 		BigDecimal stepSize;
+		
+		@Override
+		public String toString() {
+			return String.format("{pricePrecision=%d, quantityPrecision=%d, tickSize=%s, stepSize=%s}",
+					pricePrecision, quantityPrecision, tickSize, stepSize);
+		}
 	}
+
 }
