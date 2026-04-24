@@ -24,6 +24,9 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class OrderManager {
 
+	// Chinese symbol mapping
+	private static final Map<String, String> SYMBOL_MAPPING = Map.of("BIANRENSHENGUSDT", "币安人生USDT");
+
 	private final DerivativesTradingUsdsFuturesRestApi api;
 	
 	private final Map<String, String> unsupportedSymbols;
@@ -94,7 +97,15 @@ public class OrderManager {
 	}
 
 	private String normalizeSymbol(String symbol) {
-		return symbol.replace(".P", "");
+		String processed = symbol.replace(".P", "");
+		
+		// Map chinese symbols
+		String symbolMapping = SYMBOL_MAPPING.get(processed);
+		if (symbolMapping != null) {
+			processed = symbolMapping;
+		}
+		
+		return processed;
 	}
 	
 	public ApiResponse<NewAlgoOrderResponse> stopLoss(WebhookData data) {
