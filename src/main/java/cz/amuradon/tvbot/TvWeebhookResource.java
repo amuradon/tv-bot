@@ -5,6 +5,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.RestResponse.ResponseBuilder;
 import org.jboss.resteasy.reactive.RestResponse.Status;
 
+import com.binance.connector.client.common.ApiException;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewAlgoOrderResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderResponse;
@@ -63,18 +64,22 @@ public class TvWeebhookResource {
 		}
 		
 		// TODO validace, ze hodnoty davaji smysl, napr. stopLoss cena neni >10% od aktualni ceny
-		ApiResponse<NewOrderResponse> response = restClient.newOrder(data);
-		
-		Log.debugf("New order response %d %s", response.getStatusCode(), response.getData());
-		
-		if (response.getStatusCode() < 200 && response.getStatusCode() >= 300) {
-			return ResponseBuilder.create(response.getStatusCode()).entity(response.getData()).build();
+		ApiResponse<NewOrderResponse> response;
+		try {
+			response = restClient.newOrder(data);
+		} catch (ApiException e) {
+			Log.error(e);
+			return ResponseBuilder.create(e.getCode())
+					.entity(e.getResponseBody()).build();
 		}
 		
 		if ("buy".equalsIgnoreCase(data.side())) {
-			ApiResponse<NewAlgoOrderResponse> stopLossResponse = restClient.stopLoss(data);
-			if (stopLossResponse.getStatusCode() < 200 && stopLossResponse.getStatusCode() >= 300) {
-				return ResponseBuilder.create(stopLossResponse.getStatusCode()).entity(stopLossResponse.getData()).build();
+			try {
+				restClient.stopLoss(data);
+			} catch (ApiException e) {
+				Log.error(e);
+				return ResponseBuilder.create(e.getCode())
+						.entity(e.getResponseBody()).build();
 			}
 		}
 		
