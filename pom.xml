@@ -33,6 +33,14 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-rest-jackson</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-vertx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-messaging</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>io.github.binance</groupId>
