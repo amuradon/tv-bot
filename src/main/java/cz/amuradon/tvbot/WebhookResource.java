@@ -30,7 +30,7 @@ public class WebhookResource {
 	public WebhookResource(
 			@ConfigProperty(name = "TVBOT_USER_UUID") String userUuid,
 			ObjectMapper mapper,
-			@Channel(WeebhookProcessor.CHANNEL_NAME) final MutinyEmitter<WebhookData> webhookDataEmmitter) {
+			@Channel(WebhookProcessor.CHANNEL_NAME) final MutinyEmitter<WebhookData> webhookDataEmmitter) {
  		this.userUuid = userUuid;
 		this.mapper = mapper;
 		this.webhookDataEmmitter = webhookDataEmmitter;
@@ -50,10 +50,10 @@ public class WebhookResource {
 			return ResponseBuilder.create(Status.BAD_REQUEST).entity("Not able to parse body as JSON").build();
 		}
 		
-		Log.infof("Received webhook request for %s, %s", data.symbol(), data.newClientOrderId());
+		Log.infof("Received webhook request for %s, %s", data.symbol(), data.strategy());
 		
 		if (data.userUuid() == null || !data.userUuid().equals(userUuid)) {
-			Log.errorf("Request for %s, %s unauthorized", data.symbol(), data.newClientOrderId());
+			Log.errorf("Request for %s, %s unauthorized", data.symbol(), data.strategy());
 			return ResponseBuilder.create(Status.UNAUTHORIZED).build();
 		}
 

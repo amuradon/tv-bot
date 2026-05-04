@@ -1,5 +1,16 @@
 package cz.amuradon.tvbot.strategies;
 
-public class VolumeBurstVwapStrategy implements Strategy {
+import cz.amuradon.tvbot.BinanceRestClientFacade;
+
+public class VolumeBurstVwapStrategy extends AbstractStrategy {
+
+	public VolumeBurstVwapStrategy(BinanceRestClientFacade restClient) {
+		super(restClient);
+	}
+
+	@Override
+	void startInternal(String symbol) {
+		// TODO Implement strategy
+	}
 
 }

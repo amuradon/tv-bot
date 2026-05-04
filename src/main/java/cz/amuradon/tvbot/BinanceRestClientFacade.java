@@ -22,7 +22,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class OrderManager {
+public class BinanceRestClientFacade {
 
 	// Chinese symbol mapping
 	private static final Map<String, String> SYMBOL_MAPPING = Map.of("BIANRENSHENGUSDT", "币安人生USDT");
@@ -34,7 +34,7 @@ public class OrderManager {
 	private final Map<String, SymbolData> symbolData;
 
 	@Inject
-	public OrderManager(DerivativesTradingUsdsFuturesRestApi api) {
+	public BinanceRestClientFacade(DerivativesTradingUsdsFuturesRestApi api) {
 		this.api = api;
 		this.unsupportedSymbols = new HashMap<>();
 		symbolData = new HashMap<>();
@@ -70,15 +70,16 @@ public class OrderManager {
 		Log.debugf("Exchange information loaded %s", symbolData);
 	}
 	
-	public ApiResponse<NewOrderResponse> newOrder(WebhookData data) {
-		final String symbol = normalizeSymbol(data.symbol());
+	public ApiResponse<NewOrderResponse> newOrder(String symbol, String side, BigDecimal quantity, boolean reduceOnly,
+			String newClientOrderId) {
+		symbol = normalizeSymbol(symbol);
 		NewOrderRequest newOrderRequest = new NewOrderRequest()
 				.symbol(symbol)
-				.side("buy".equalsIgnoreCase(data.side()) ? Side.BUY : Side.SELL)
+				.side("buy".equalsIgnoreCase(side) ? Side.BUY : Side.SELL)
 				.type("MARKET")
-				.quantity(normalizeQuantity(data.quantity(), symbol))
-				.reduceOnly(data.reduceOnly() ? "true" : "false")
-				.newClientOrderId(data.newClientOrderId());
+				.quantity(normalizeQuantity(quantity, symbol))
+				.reduceOnly(reduceOnly ? "true" : "false")
+				.newClientOrderId(newClientOrderId);
 		
 		// TODO ExchangeInfo muze byt stare a dojde k chybe -> podle typu chyby obnovit a zkusit znovu
 		return api.newOrder(newOrderRequest);
@@ -108,13 +109,13 @@ public class OrderManager {
 		return processed;
 	}
 	
-	public ApiResponse<NewAlgoOrderResponse> stopLoss(WebhookData data) {
-		final String symbol = normalizeSymbol(data.symbol());
+	public ApiResponse<NewAlgoOrderResponse> stopLoss(String symbol, BigDecimal stopLoss) {
+		symbol = normalizeSymbol(symbol);
 		NewAlgoOrderRequest stopLossRequest = new NewAlgoOrderRequest()
 				.symbol(symbol)
 				.side(Side.SELL)
 				.type("STOP_MARKET")
-				.triggerPrice(normalizePrice(data.stopLoss(), symbol))
+				.triggerPrice(normalizePrice(stopLoss, symbol))
 				.algoType("CONDITIONAL")
 				.closePosition("true");
 		
