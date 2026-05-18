@@ -70,12 +70,12 @@ public class BinanceRestClientFacade {
 		Log.debugf("Exchange information loaded %s", symbolData);
 	}
 	
-	public ApiResponse<NewOrderResponse> newOrder(String symbol, String side, BigDecimal quantity, boolean reduceOnly,
+	public ApiResponse<NewOrderResponse> newOrder(String symbol, Side side, BigDecimal quantity, boolean reduceOnly,
 			String newClientOrderId) {
 		symbol = normalizeSymbol(symbol);
 		NewOrderRequest newOrderRequest = new NewOrderRequest()
 				.symbol(symbol)
-				.side("buy".equalsIgnoreCase(side) ? Side.BUY : Side.SELL)
+				.side(side)
 				.type("MARKET")
 				.quantity(normalizeQuantity(quantity, symbol))
 				.reduceOnly(reduceOnly ? "true" : "false")

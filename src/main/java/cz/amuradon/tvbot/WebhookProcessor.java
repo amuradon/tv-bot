@@ -23,7 +23,7 @@ public class WebhookProcessor {
 	@Incoming(CHANNEL_NAME)
 	public Uni<Void> handle(WebhookData data) {
 		Strategy strategy = strategyFactory.create(data.strategy());
-		strategy.start(data.symbol());
+		strategy.start(data.symbol(), data.quantity());
 		
 		return Uni.createFrom().voidItem();
 	}

@@ -4,8 +4,11 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.binance.connector.client.common.configuration.ClientConfiguration;
 import com.binance.connector.client.common.configuration.SignatureConfiguration;
+import com.binance.connector.client.common.websocket.configuration.WebSocketClientConfiguration;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.DerivativesTradingUsdsFuturesRestApiUtil;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
+import com.binance.connector.client.derivatives_trading_usds_futures.websocket.stream.DerivativesTradingUsdsFuturesWebSocketStreamsUtil;
+import com.binance.connector.client.derivatives_trading_usds_futures.websocket.stream.api.DerivativesTradingUsdsFuturesWebSocketStreams;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -25,4 +28,11 @@ public class BeanConfig {
 		return new DerivativesTradingUsdsFuturesRestApi(config);
 	}
 	
+	@ApplicationScoped
+	@Produces
+	public DerivativesTradingUsdsFuturesWebSocketStreams wsStreams() {
+		WebSocketClientConfiguration config = DerivativesTradingUsdsFuturesWebSocketStreamsUtil.getClientConfiguration();
+		config.setUsePool(true);
+		return new DerivativesTradingUsdsFuturesWebSocketStreams(config);
+	}
 }
